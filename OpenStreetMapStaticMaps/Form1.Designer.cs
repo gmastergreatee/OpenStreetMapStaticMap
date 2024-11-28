@@ -49,7 +49,10 @@
             txtLon7 = new TextBox();
             txtLat7 = new TextBox();
             flowLayoutPanel1 = new FlowLayoutPanel();
-            label1 = new Label();
+            label5 = new Label();
+            label6 = new Label();
+            txtMapWidth = new TextBox();
+            txtMapHeight = new TextBox();
             ((System.ComponentModel.ISupportInitialize)picMapImage).BeginInit();
             flowLayoutPanel1.SuspendLayout();
             SuspendLayout();
@@ -67,11 +70,11 @@
             // txtZoom
             // 
             txtZoom.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            txtZoom.Enabled = false;
             txtZoom.Location = new Point(79, 367);
             txtZoom.Name = "txtZoom";
-            txtZoom.Size = new Size(57, 23);
+            txtZoom.Size = new Size(50, 23);
             txtZoom.TabIndex = 2;
-            txtZoom.Text = "8";
             // 
             // txtLon1
             // 
@@ -243,22 +246,53 @@
             flowLayoutPanel1.Size = new Size(649, 349);
             flowLayoutPanel1.TabIndex = 22;
             // 
-            // label1
+            // label5
             // 
-            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            label1.AutoSize = true;
-            label1.Location = new Point(163, 370);
-            label1.Name = "label1";
-            label1.Size = new Size(155, 15);
-            label1.TabIndex = 23;
-            label1.Text = "<-- Please enter 1 to 18 only";
+            label5.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            label5.AutoSize = true;
+            label5.Location = new Point(202, 370);
+            label5.Name = "label5";
+            label5.Size = new Size(39, 15);
+            label5.TabIndex = 24;
+            label5.Text = "Width";
+            // 
+            // label6
+            // 
+            label6.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            label6.AutoSize = true;
+            label6.Location = new Point(366, 370);
+            label6.Name = "label6";
+            label6.Size = new Size(43, 15);
+            label6.TabIndex = 25;
+            label6.Text = "Height";
+            // 
+            // txtMapWidth
+            // 
+            txtMapWidth.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            txtMapWidth.Location = new Point(247, 367);
+            txtMapWidth.Name = "txtMapWidth";
+            txtMapWidth.Size = new Size(78, 23);
+            txtMapWidth.TabIndex = 26;
+            txtMapWidth.Text = "456";
+            // 
+            // txtMapHeight
+            // 
+            txtMapHeight.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            txtMapHeight.Location = new Point(415, 367);
+            txtMapHeight.Name = "txtMapHeight";
+            txtMapHeight.Size = new Size(78, 23);
+            txtMapHeight.TabIndex = 27;
+            txtMapHeight.Text = "343";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(674, 489);
-            Controls.Add(label1);
+            Controls.Add(txtMapHeight);
+            Controls.Add(txtMapWidth);
+            Controls.Add(label6);
+            Controls.Add(label5);
             Controls.Add(flowLayoutPanel1);
             Controls.Add(txtLon7);
             Controls.Add(txtLat7);
@@ -313,6 +347,9 @@
         private TextBox txtLon7;
         private TextBox txtLat7;
         private FlowLayoutPanel flowLayoutPanel1;
-        private Label label1;
+        private Label label5;
+        private Label label6;
+        private TextBox txtMapWidth;
+        private TextBox txtMapHeight;
     }
 }
