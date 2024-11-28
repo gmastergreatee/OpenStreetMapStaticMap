@@ -232,7 +232,7 @@ namespace OpenStreetMapStaticMaps
                             pinImage,
                             new PointF(
                                 pinPosInImage.X - (pinImage.Width / 2),
-                                pinPosInImage.Y - (pinImage.Height / 2)
+                                pinPosInImage.Y - pinImage.Height
                             )
                         );
 
@@ -258,7 +258,7 @@ namespace OpenStreetMapStaticMaps
         public static int CalculateZoomLevel(double minLat, double maxLat, double minLon, double maxLon, int mapWidth, int mapHeight)
         {
             const double tileSize = 256.0; // Tile size in pixels
-            const int maxZoomLevel = 19;   // Maximum zoom level for OSM
+            const int maxZoomLevel = 8;   // Maximum zoom level for OSM
 
             // Calculate bounding box dimensions in degrees
             double boundingBoxWidth = maxLon - minLon;
