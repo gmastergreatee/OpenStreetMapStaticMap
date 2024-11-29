@@ -205,8 +205,8 @@ namespace OpenStreetMapStaticMaps.Core
             }
 
             // clip image to desired dimensions
-            var medianX = pinPositionsInImage.Sum(i => i.X) / pinPositionsInImage.Count;
-            var medianY = pinPositionsInImage.Sum(i => i.Y) / pinPositionsInImage.Count;
+            var medianX = (pinPositionsInImage.Max(i => i.X) - pinPositionsInImage.Min(i => i.X)) / 2;
+            var medianY = (pinPositionsInImage.Max(i => i.Y) - pinPositionsInImage.Min(i => i.Y)) / 2;
 
             var halfWidth = this.ImageWidth / 2;
             var halfHeight = this.ImageHeight / 2;
