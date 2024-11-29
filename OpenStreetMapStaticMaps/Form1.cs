@@ -43,6 +43,7 @@ namespace OpenStreetMapStaticMaps
                     this.Invoke(() =>
                     {
                         picMapImage.Image = img;
+                        txtZoom.Text = mapper.ZoomLevel.ToString();
                         btnDrawIt.Enabled = true;
                     });
                 });
