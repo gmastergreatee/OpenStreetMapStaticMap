@@ -123,6 +123,11 @@ namespace OpenStreetMapStaticMaps.Core
             return DrawTileBitmap(tileList, coordinates, mapStartTilePoint, mapEndTilePoint, pinImage);
         }
 
+        public Image PlotMap(List<CoordinatesModel> coordinates, Image? pinImage = null)
+        {
+            return PlotMapAsync(coordinates, pinImage).GetAwaiter().GetResult();
+        }
+
         private async Task<Image> GetMapTile(TileModel tile)
         {
             try
