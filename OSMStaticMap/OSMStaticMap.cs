@@ -95,12 +95,35 @@ namespace OSMStaticMap
 
             }
 
-            await Parallel.ForEachAsync(tileList, async (tileObj, cancellationToken) =>
+            // initialize BitMap object and clipping mask
+            var bitMap = new Bitmap(
+                256 * (mapEndTilePoint.X - mapStartTilePoint.X + 1),
+                256 * (mapEndTilePoint.Y - mapStartTilePoint.Y + 1)
+            );
+            var clipRectObject = this.GetClipRectangle(tileList, coordinates, pinImage, bitMap.Width, bitMap.Height);
+            var clipRect = clipRectObject.ClippedRectangle;
+
+            await Parallel.ForEachAsync(tileList, async (tile, cancellationToken) =>
             {
-                tileObj.TileImage = await this.GetMapTile(tileObj);
+                // filter out unused tiles
+                if (
+                    (
+                        ((tile.RenderOffset.X * 256) <= clipRect.X && ((tile.RenderOffset.X * 256) + 256) >= clipRect.X) ||
+                        ((tile.RenderOffset.X * 256) >= clipRect.X && ((tile.RenderOffset.X * 256) + 256) <= (clipRect.X + clipRect.Width)) ||
+                        ((tile.RenderOffset.X * 256) <= (clipRect.X + clipRect.Width) && ((tile.RenderOffset.X * 256) + 256) >= (clipRect.X + clipRect.Width))
+                    ) &&
+                    (
+                        ((tile.RenderOffset.Y * 256) <= clipRect.Y && ((tile.RenderOffset.Y * 256) + 256) >= clipRect.Y) ||
+                        ((tile.RenderOffset.Y * 256) >= clipRect.Y && ((tile.RenderOffset.Y * 256) + 256) <= (clipRect.Y + clipRect.Height)) ||
+                        ((tile.RenderOffset.Y * 256) <= (clipRect.Y + clipRect.Height) && ((tile.RenderOffset.Y * 256) + 256) >= (clipRect.Y + clipRect.Height))
+                    )
+                )
+                {
+                    tile.TileImage = await this.GetMapTile(tile);
+                }
             });
 
-            return DrawTileBitmap(tileList, coordinates, mapStartTilePoint, mapEndTilePoint, pinImage);
+            return DrawTileBitmap(bitMap, tileList, coordinates, clipRectObject, pinImage);
         }
 
         public Image PlotMap(List<CoordinatesModel> coordinates, Image? pinImage = null)
@@ -160,20 +183,49 @@ namespace OSMStaticMap
             }
         }
 
-        private Image DrawTileBitmap(List<TileModel> tiles, List<CoordinatesModel> coordinates, Point mapStartTile, Point mapEndTile, Image? pinImage)
+        private Image DrawTileBitmap(Bitmap bitMap, List<TileModel> tiles, List<CoordinatesModel> coordinates, ClippedRectangleModel clipRectObject, Image? pinImage)
         {
             if (tiles == null || tiles.Count <= 0 || coordinates == null || coordinates.Count <= 0)
             {
                 return new Bitmap(this.ImageWidth, this.ImageHeight);
             }
 
-            var bitMap = new Bitmap(
-                256 * (mapEndTile.X - mapStartTile.X + 1),
-                256 * (mapEndTile.Y - mapStartTile.Y + 1)
-            );
+            var g = Graphics.FromImage(bitMap);
 
+            // draw map tiles
+            foreach (var tile in tiles)
+            {
+                if (tile.TileImage != null)
+                {
+                    g.DrawImage(tile.TileImage, new Point(256 * tile.RenderOffset.X, 256 * tile.RenderOffset.Y));
+                }
+            }
+
+            // draw pins
+            if (pinImage != null && clipRectObject.PinPositions.Count > 0)
+            {
+                foreach (var pin in clipRectObject.PinPositions)
+                {
+                    g.DrawImage(
+                        pinImage,
+                        pin
+                    );
+                }
+            }
+
+            // dont cutout map if calculated map dimensions are smaller than required
+            if (bitMap.Width < clipRectObject.ClippedRectangle.Width || bitMap.Height < clipRectObject.ClippedRectangle.Height)
+            {
+                return bitMap;
+            }
+
+            return bitMap.Clone(clipRectObject.ClippedRectangle, bitMap.PixelFormat);
+        }
+
+        private ClippedRectangleModel GetClipRectangle(List<TileModel> tiles, List<CoordinatesModel> coordinates, Image? pinImage, int imageWidth, int imageHeight)
+        {
             var positionsToKeepInMap = new List<PointF>();
-            var pinPositionsInImage = new List<PointF>();
+            var pinPositionsInMap = new List<PointF>();
 
             foreach (var coord in coordinates)
             {
@@ -197,7 +249,7 @@ namespace OSMStaticMap
                     positionsToKeepInMap.Add(pinPosInImage);
                     if (pinImage != null)
                     {
-                        pinPositionsInImage.Add(new PointF(
+                        pinPositionsInMap.Add(new PointF(
                             pinPosInImage.X - (pinImage.Width / 2),
                             pinPosInImage.Y - pinImage.Height
                         ));
@@ -206,8 +258,19 @@ namespace OSMStaticMap
             }
 
             // clip image to desired dimensions
-            var medianX = (positionsToKeepInMap.Max(i => i.X) + positionsToKeepInMap.Min(i => i.X)) / 2;
-            var medianY = (positionsToKeepInMap.Max(i => i.Y) + positionsToKeepInMap.Min(i => i.Y)) / 2;
+            float medianX = 0;
+            float medianY = 0;
+
+            if (pinPositionsInMap.Count > 0)
+            {
+                medianX = (pinPositionsInMap.Max(i => i.X) + pinPositionsInMap.Min(i => i.X)) / 2;
+                medianY = (pinPositionsInMap.Max(i => i.Y) + pinPositionsInMap.Min(i => i.Y)) / 2;
+            }
+            else
+            {
+                medianX = (positionsToKeepInMap.Max(i => i.X) + positionsToKeepInMap.Min(i => i.X)) / 2;
+                medianY = (positionsToKeepInMap.Max(i => i.Y) + positionsToKeepInMap.Min(i => i.Y)) / 2;
+            }
 
             var halfWidth = this.ImageWidth / 2;
             var halfHeight = this.ImageHeight / 2;
@@ -217,58 +280,16 @@ namespace OSMStaticMap
                 Math.Max(0, medianY - halfHeight)
             );
 
-            var clipRect = new RectangleF(
-                medianPosition.X,
-                medianPosition.Y,
-                Math.Min(this.ImageWidth, bitMap.Width),
-                Math.Min(this.ImageHeight, bitMap.Height)
-            );
-
-            var g = Graphics.FromImage(bitMap);
-
-            // filter out unused tiles
-            var usedTiles = tiles.Where(tile =>
-                (
-                    ((tile.RenderOffset.X * 256) <= clipRect.X && ((tile.RenderOffset.X * 256) + 256) >= clipRect.X) ||
-                    ((tile.RenderOffset.X * 256) >= clipRect.X && ((tile.RenderOffset.X * 256) + 256) <= (clipRect.X + clipRect.Width)) ||
-                    ((tile.RenderOffset.X * 256) <= (clipRect.X + clipRect.Width) && ((tile.RenderOffset.X * 256) + 256) >= (clipRect.X + clipRect.Width))
-                ) &&
-                (
-                    ((tile.RenderOffset.Y * 256) <= clipRect.Y && ((tile.RenderOffset.X * 256) + 256) >= clipRect.Y) ||
-                    ((tile.RenderOffset.Y * 256) >= clipRect.Y && ((tile.RenderOffset.X * 256) + 256) <= (clipRect.Y + clipRect.Height)) ||
-                    ((tile.RenderOffset.Y * 256) <= (clipRect.Y + clipRect.Height) && ((tile.RenderOffset.X * 256) + 256) >= (clipRect.Y + clipRect.Height))
-                )
-
-            );
-
-            // draw map tiles
-            foreach (var tile in usedTiles)
+            return new ClippedRectangleModel()
             {
-                if (tile.TileImage != null)
-                {
-                    g.DrawImage(tile.TileImage, new Point(256 * tile.RenderOffset.X, 256 * tile.RenderOffset.Y));
-                }
-            }
-
-            // draw pins
-            if (pinImage != null && pinPositionsInImage.Count > 0)
-            {
-                foreach (var pin in pinPositionsInImage)
-                {
-                    g.DrawImage(
-                        pinImage,
-                        pin
-                    );
-                }
-            }
-
-            // dont cutout map if calculated map dimensions are smaller than required
-            if (bitMap.Width < clipRect.Width || bitMap.Height < clipRect.Height)
-            {
-                return bitMap;
-            }
-
-            return bitMap.Clone(clipRect, bitMap.PixelFormat);
+                ClippedRectangle = new RectangleF(
+                    medianPosition.X,
+                    medianPosition.Y,
+                    Math.Min(this.ImageWidth, imageWidth),
+                    Math.Min(this.ImageHeight, imageHeight)
+                ),
+                PinPositions = pinPositionsInMap,
+            };
         }
     }
 }
