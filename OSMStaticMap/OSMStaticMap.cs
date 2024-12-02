@@ -229,14 +229,14 @@ namespace OSMStaticMap
             // filter out unused tiles
             var usedTiles = tiles.Where(tile =>
                 (
-                    ((tile.RenderOffset.X * 256) <= clipRect.X && (tile.RenderOffset.X * 257) >= clipRect.X) ||
-                    ((tile.RenderOffset.X * 256) >= clipRect.X && (tile.RenderOffset.X * 257) <= (clipRect.X + clipRect.Width)) ||
-                    ((tile.RenderOffset.X * 256) <=  (clipRect.X + clipRect.Width) && (tile.RenderOffset.X * 257) >= (clipRect.X + clipRect.Width))
+                    ((tile.RenderOffset.X * 256) <= clipRect.X && ((tile.RenderOffset.X * 256) + 256) >= clipRect.X) ||
+                    ((tile.RenderOffset.X * 256) >= clipRect.X && ((tile.RenderOffset.X * 256) + 256) <= (clipRect.X + clipRect.Width)) ||
+                    ((tile.RenderOffset.X * 256) <= (clipRect.X + clipRect.Width) && ((tile.RenderOffset.X * 256) + 256) >= (clipRect.X + clipRect.Width))
                 ) &&
                 (
-                    ((tile.RenderOffset.Y * 256) <= clipRect.Y && (tile.RenderOffset.Y * 257) >= clipRect.Y) ||
-                    ((tile.RenderOffset.Y * 256) >= clipRect.Y && (tile.RenderOffset.Y * 257) <= (clipRect.Y + clipRect.Height)) ||
-                    ((tile.RenderOffset.Y * 256) <=  (clipRect.Y + clipRect.Height) && (tile.RenderOffset.Y * 257) >= (clipRect.Y + clipRect.Height))
+                    ((tile.RenderOffset.Y * 256) <= clipRect.Y && ((tile.RenderOffset.X * 256) + 256) >= clipRect.Y) ||
+                    ((tile.RenderOffset.Y * 256) >= clipRect.Y && ((tile.RenderOffset.X * 256) + 256) <= (clipRect.Y + clipRect.Height)) ||
+                    ((tile.RenderOffset.Y * 256) <= (clipRect.Y + clipRect.Height) && ((tile.RenderOffset.X * 256) + 256) >= (clipRect.Y + clipRect.Height))
                 )
 
             );
