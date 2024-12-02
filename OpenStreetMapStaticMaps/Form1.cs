@@ -6,7 +6,7 @@ namespace OpenStreetMapStaticMaps
     public partial class Form1 : Form
     {
         private List<CoordinatesModel> coordinateList = new List<CoordinatesModel>();
-        private Mapper mapper;
+        private OSMStaticMap mapper;
 
         private int ImageWidth = 512;
         private int ImageHeight = 512;
@@ -14,7 +14,7 @@ namespace OpenStreetMapStaticMaps
         public Form1()
         {
             InitializeComponent();
-            mapper = new Mapper(
+            mapper = new OSMStaticMap(
                 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 this.ImageWidth,
                 this.ImageHeight

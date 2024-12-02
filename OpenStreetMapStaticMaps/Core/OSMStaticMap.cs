@@ -3,14 +3,14 @@ using OpenStreetMapStaticMaps.Core.Models;
 
 namespace OpenStreetMapStaticMaps.Core
 {
-    internal class Mapper
+    internal class OSMStaticMap
     {
         public string TileURL { get; private set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
         public int ZoomLevel { get; private set; }
 
-        public Mapper(string URL, int imageWidth, int imageHeight, int zoom = 0)
+        public OSMStaticMap(string URL, int imageWidth, int imageHeight, int zoom = 0)
         {
             this.TileURL = URL;
             this.ImageWidth = imageWidth;
