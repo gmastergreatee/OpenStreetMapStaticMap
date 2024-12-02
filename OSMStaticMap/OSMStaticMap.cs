@@ -101,23 +101,11 @@ namespace OSMStaticMap
                 256 * (mapEndTilePoint.Y - mapStartTilePoint.Y + 1)
             );
             var clipRectObject = this.GetClipRectangle(tileList, coordinates, pinImage, bitMap.Width, bitMap.Height);
-            var clipRect = clipRectObject.ClippedRectangle;
 
             await Parallel.ForEachAsync(tileList, async (tile, cancellationToken) =>
             {
                 // filter out unused tiles
-                if (
-                    (
-                        ((tile.RenderOffset.X * 256) <= clipRect.X && ((tile.RenderOffset.X * 256) + 256) >= clipRect.X) ||
-                        ((tile.RenderOffset.X * 256) >= clipRect.X && ((tile.RenderOffset.X * 256) + 256) <= (clipRect.X + clipRect.Width)) ||
-                        ((tile.RenderOffset.X * 256) <= (clipRect.X + clipRect.Width) && ((tile.RenderOffset.X * 256) + 256) >= (clipRect.X + clipRect.Width))
-                    ) &&
-                    (
-                        ((tile.RenderOffset.Y * 256) <= clipRect.Y && ((tile.RenderOffset.Y * 256) + 256) >= clipRect.Y) ||
-                        ((tile.RenderOffset.Y * 256) >= clipRect.Y && ((tile.RenderOffset.Y * 256) + 256) <= (clipRect.Y + clipRect.Height)) ||
-                        ((tile.RenderOffset.Y * 256) <= (clipRect.Y + clipRect.Height) && ((tile.RenderOffset.Y * 256) + 256) >= (clipRect.Y + clipRect.Height))
-                    )
-                )
+                if (this.IsTileWithinRect(tile, clipRectObject.ClippedRectangle))
                 {
                     tile.TileImage = await this.GetMapTile(tile);
                 }
@@ -181,6 +169,20 @@ namespace OSMStaticMap
             {
                 return new Bitmap(256, 256);
             }
+        }
+
+        private bool IsTileWithinRect(TileModel tile, RectangleF clipRect)
+        {
+            return (
+                ((tile.RenderOffset.X * 256) <= clipRect.X && ((tile.RenderOffset.X * 256) + 256) >= clipRect.X) ||
+                ((tile.RenderOffset.X * 256) >= clipRect.X && ((tile.RenderOffset.X * 256) + 256) <= (clipRect.X + clipRect.Width)) ||
+                ((tile.RenderOffset.X * 256) <= (clipRect.X + clipRect.Width) && ((tile.RenderOffset.X * 256) + 256) >= (clipRect.X + clipRect.Width))
+            ) &&
+            (
+                ((tile.RenderOffset.Y * 256) <= clipRect.Y && ((tile.RenderOffset.Y * 256) + 256) >= clipRect.Y) ||
+                ((tile.RenderOffset.Y * 256) >= clipRect.Y && ((tile.RenderOffset.Y * 256) + 256) <= (clipRect.Y + clipRect.Height)) ||
+                ((tile.RenderOffset.Y * 256) <= (clipRect.Y + clipRect.Height) && ((tile.RenderOffset.Y * 256) + 256) >= (clipRect.Y + clipRect.Height))
+            );
         }
 
         private Image DrawTileBitmap(Bitmap bitMap, List<TileModel> tiles, List<CoordinatesModel> coordinates, ClippedRectangleModel clipRectObject, Image? pinImage)
