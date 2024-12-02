@@ -5,12 +5,10 @@ namespace OpenStreetMapStaticMaps.Core
 {
     internal class Mapper
     {
-        public string TileURL { get; }
+        public string TileURL { get; private set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
-        public int ZoomLevel { get; }
-
-        private int _zoom = 0;
+        public int ZoomLevel { get; private set; }
 
         public Mapper(string URL, int imageWidth, int imageHeight, int zoom = 0)
         {
@@ -22,29 +20,9 @@ namespace OpenStreetMapStaticMaps.Core
 
         public async Task<Image> PlotMapAsync(List<CoordinatesModel> coordinates, Image? pinImage = null)
         {
-            var minLatitude = coordinates.Min(i => i.LatitudeDegrees);
-            var minLongitude = coordinates.Min(i => i.LongitudeDegrees);
-            var maxLatitude = coordinates.Max(i => i.LatitudeDegrees);
-            var maxLongitude = coordinates.Max(i => i.LongitudeDegrees);
+            this.ZoomLevel = this.CalculateZoom(coordinates, this.ImageWidth, this.ImageHeight);
 
-            if (this.ZoomLevel <= 0)
-            {
-                // automatically determine zoom level
-                this._zoom = OSMMapHelper.CalculateZoomLevel(
-                    minLatitude,
-                    maxLatitude,
-                    minLongitude,
-                    maxLongitude,
-                    this.ImageWidth,
-                    this.ImageHeight
-                );
-            }
-            else
-            {
-                this._zoom = this.ZoomLevel;
-            }
-
-            var maxTileCountPerAxis = Math.Pow(2, this._zoom);
+            var maxTileCountPerAxis = Math.Pow(2, this.ZoomLevel);
             var tileMappingList = new List<TileModel>();
 
             foreach (var pin in coordinates)
@@ -54,7 +32,7 @@ namespace OpenStreetMapStaticMaps.Core
                         OSMMapHelper.WorldToTilePos(
                             pin.LongitudeDegrees,
                             pin.LatitudeDegrees,
-                            this._zoom
+                            this.ZoomLevel
                         )
                     )
                 );
@@ -128,6 +106,30 @@ namespace OpenStreetMapStaticMaps.Core
             return PlotMapAsync(coordinates, pinImage).GetAwaiter().GetResult();
         }
 
+        private int CalculateZoom(List<CoordinatesModel> coordinates, int imageWidth, int imageHeight)
+        {
+            var tempZoom = this.ZoomLevel;
+            if (this.ZoomLevel <= 0)
+            {
+                var minLatitude = coordinates.Min(i => i.LatitudeDegrees);
+                var minLongitude = coordinates.Min(i => i.LongitudeDegrees);
+                var maxLatitude = coordinates.Max(i => i.LatitudeDegrees);
+                var maxLongitude = coordinates.Max(i => i.LongitudeDegrees);
+
+                // automatically determine zoom level
+                tempZoom = OSMMapHelper.CalculateZoomLevel(
+                    minLatitude,
+                    maxLatitude,
+                    minLongitude,
+                    maxLongitude,
+                    imageWidth,
+                    imageHeight
+                );
+            }
+
+            return tempZoom;
+        }
+
         private async Task<Image> GetMapTile(TileModel tile)
         {
             try
@@ -135,7 +137,7 @@ namespace OpenStreetMapStaticMaps.Core
                 using (var hc = new HttpClient())
                 {
                     var address = this.TileURL
-                        .Replace("{z}", this._zoom.ToString())
+                        .Replace("{z}", this.ZoomLevel.ToString())
                         .Replace("{x}", tile.TileCoords.X.ToString())
                         .Replace("{y}", tile.TileCoords.Y.ToString());
 
@@ -176,7 +178,7 @@ namespace OpenStreetMapStaticMaps.Core
             {
                 foreach (var coord in coordinates.Where(i => i.ShowPin).OrderBy(i => i.LongitudeDegrees).ThenBy(i => i.LatitudeDegrees))
                 {
-                    var pinTilePos = OSMMapHelper.WorldToTilePos(coord.LongitudeDegrees, coord.LatitudeDegrees, this._zoom);
+                    var pinTilePos = OSMMapHelper.WorldToTilePos(coord.LongitudeDegrees, coord.LatitudeDegrees, this.ZoomLevel);
 
                     var tile = tiles.FirstOrDefault(i =>
                         i.TileCoords.X <= pinTilePos.X && i.TileCoords.X + 1 > pinTilePos.X &&
