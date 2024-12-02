@@ -1,21 +1,23 @@
-﻿using OpenStreetMapStaticMaps.Core.Helpers;
-using OpenStreetMapStaticMaps.Core.Models;
+﻿using OSMStaticMap.Helpers;
+using OSMStaticMap.Models;
+using System.Drawing;
 
-namespace OpenStreetMapStaticMaps.Core
+namespace OSMStaticMap
 {
-    internal class OSMStaticMap
+    public class OSMStaticMap
     {
         public string TileURL { get; private set; }
         public int ImageWidth { get; set; }
         public int ImageHeight { get; set; }
-        public int ZoomLevel { get; private set; }
+        public int ZoomLevel { get; set; }
+        public byte MaxZoom { get; set; }
 
-        public OSMStaticMap(string URL, int imageWidth, int imageHeight, int zoom = 0)
+        public OSMStaticMap(string URL, int imageWidth, int imageHeight)
         {
             this.TileURL = URL;
             this.ImageWidth = imageWidth;
             this.ImageHeight = imageHeight;
-            this.ZoomLevel = zoom > 0 ? Math.Min(zoom, 19) : 0;
+            this.ZoomLevel = 0;
         }
 
         public async Task<Image> PlotMapAsync(List<CoordinatesModel> coordinates, Image? pinImage = null)
@@ -123,7 +125,8 @@ namespace OpenStreetMapStaticMaps.Core
                     minLongitude,
                     maxLongitude,
                     imageWidth,
-                    imageHeight
+                    imageHeight,
+                    this.MaxZoom
                 );
             }
 
@@ -157,63 +160,54 @@ namespace OpenStreetMapStaticMaps.Core
             }
         }
 
-        private Image DrawTileBitmap(List<TileModel> tiles, List<CoordinatesModel> coordinates, Point mapStartTile, Point mapEndTile, Image pinImage)
+        private Image DrawTileBitmap(List<TileModel> tiles, List<CoordinatesModel> coordinates, Point mapStartTile, Point mapEndTile, Image? pinImage)
         {
+            if (tiles == null || tiles.Count <= 0 || coordinates == null || coordinates.Count <= 0)
+            {
+                return new Bitmap(this.ImageWidth, this.ImageHeight);
+            }
+
             var bitMap = new Bitmap(
                 256 * (mapEndTile.X - mapStartTile.X + 1),
                 256 * (mapEndTile.Y - mapStartTile.Y + 1)
             );
-            var g = Graphics.FromImage(bitMap);
 
-            // draw map tiles
-            foreach (var tile in tiles)
-            {
-                g.DrawImage(tile.TileImage, new Point(256 * tile.RenderOffset.X, 256 * tile.RenderOffset.Y));
-            }
-
+            var positionsToKeepInMap = new List<PointF>();
             var pinPositionsInImage = new List<PointF>();
 
-            // draw pins
-            if (coordinates != null)
+            foreach (var coord in coordinates)
             {
-                foreach (var coord in coordinates.Where(i => i.ShowPin).OrderBy(i => i.LongitudeDegrees).ThenBy(i => i.LatitudeDegrees))
-                {
-                    var pinTilePos = OSMMapHelper.WorldToTilePos(coord.LongitudeDegrees, coord.LatitudeDegrees, this.ZoomLevel);
+                var pinTilePos = OSMMapHelper.WorldToTilePos(coord.LongitudeDegrees, coord.LatitudeDegrees, this.ZoomLevel);
 
-                    var tile = tiles.FirstOrDefault(i =>
-                        i.TileCoords.X <= pinTilePos.X && i.TileCoords.X + 1 > pinTilePos.X &&
-                        i.TileCoords.Y <= pinTilePos.Y && i.TileCoords.Y + 1 > pinTilePos.Y
+                var tile = tiles.FirstOrDefault(i =>
+                    i.TileCoords.X <= pinTilePos.X && i.TileCoords.X + 1 > pinTilePos.X &&
+                    i.TileCoords.Y <= pinTilePos.Y && i.TileCoords.Y + 1 > pinTilePos.Y
+                );
+
+                if (coord.ShowPin && tile != null)
+                {
+                    var x_in_tile = 256 * (pinTilePos.X - Math.Round(pinTilePos.X, MidpointRounding.ToZero));
+                    var y_in_tile = 256 * (pinTilePos.Y - Math.Round(pinTilePos.Y, MidpointRounding.ToZero));
+
+                    var pinPosInImage = new PointF(
+                        Convert.ToInt32((tile.RenderOffset.X * 256) + x_in_tile),
+                        Convert.ToInt32((tile.RenderOffset.Y * 256) + y_in_tile)
                     );
 
-                    if (tile != null)
+                    positionsToKeepInMap.Add(pinPosInImage);
+                    if (pinImage != null)
                     {
-                        var x_in_tile = 256 * (pinTilePos.X - Math.Round(pinTilePos.X, MidpointRounding.ToZero));
-                        var y_in_tile = 256 * (pinTilePos.Y - Math.Round(pinTilePos.Y, MidpointRounding.ToZero));
-
-                        var pinPosInImage = new PointF(
-                            Convert.ToInt32((tile.RenderOffset.X * 256) + x_in_tile),
-                            Convert.ToInt32((tile.RenderOffset.Y * 256) + y_in_tile)
-                        );
-
-                        if (pinImage != null)
-                        {
-                            g.DrawImage(
-                                pinImage,
-                                new PointF(
-                                    pinPosInImage.X - (pinImage.Width / 2),
-                                    pinPosInImage.Y - pinImage.Height
-                                )
-                            );
-                        }
-
-                        pinPositionsInImage.Add(pinPosInImage);
+                        pinPositionsInImage.Add(new PointF(
+                            pinPosInImage.X - (pinImage.Width / 2),
+                            pinPosInImage.Y - pinImage.Height
+                        ));
                     }
                 }
             }
 
             // clip image to desired dimensions
-            var medianX = (pinPositionsInImage.Max(i => i.X) + pinPositionsInImage.Min(i => i.X)) / 2;
-            var medianY = (pinPositionsInImage.Max(i => i.Y) + pinPositionsInImage.Min(i => i.Y)) / 2;
+            var medianX = (positionsToKeepInMap.Max(i => i.X) + positionsToKeepInMap.Min(i => i.X)) / 2;
+            var medianY = (positionsToKeepInMap.Max(i => i.Y) + positionsToKeepInMap.Min(i => i.Y)) / 2;
 
             var halfWidth = this.ImageWidth / 2;
             var halfHeight = this.ImageHeight / 2;
@@ -224,6 +218,44 @@ namespace OpenStreetMapStaticMaps.Core
             );
 
             var clipRect = new RectangleF(medianPosition.X, medianPosition.Y, this.ImageWidth, this.ImageHeight);
+
+            var g = Graphics.FromImage(bitMap);
+
+            // filter out unused tiles
+            var usedTiles = tiles.Where(tile =>
+                (tile.RenderOffset.X + 256) >= clipRect.X &&
+                tile.RenderOffset.X < (clipRect.X + clipRect.Width) &&
+                (tile.RenderOffset.Y + 256) >= clipRect.Y &&
+                tile.RenderOffset.Y < (clipRect.Y + clipRect.Height)
+            );
+
+            // draw map tiles
+            foreach (var tile in usedTiles)
+            {
+                if (tile.TileImage != null)
+                {
+                    g.DrawImage(tile.TileImage, new Point(256 * tile.RenderOffset.X, 256 * tile.RenderOffset.Y));
+                }
+            }
+
+            // draw pins
+            if (pinImage != null && pinPositionsInImage.Count > 0)
+            {
+                foreach (var pin in pinPositionsInImage)
+                {
+                    g.DrawImage(
+                        pinImage,
+                        pin
+                    );
+                }
+            }
+
+            // dont cutout map if calculated map dimensions are smaller than required
+            if (bitMap.Width < clipRect.Width || bitMap.Height < clipRect.Height)
+            {
+                return bitMap;
+            }
+
             return bitMap.Clone(clipRect, bitMap.PixelFormat);
         }
     }

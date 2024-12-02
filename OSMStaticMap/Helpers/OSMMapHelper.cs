@@ -1,9 +1,13 @@
-﻿namespace OpenStreetMapStaticMaps.Core.Helpers
+﻿using System.Drawing;
+
+namespace OSMStaticMap.Helpers
 {
     internal static class OSMMapHelper
     {
-        public static int CalculateZoomLevel(double minLat, double maxLat, double minLon, double maxLon, int mapWidth, int mapHeight, double tileSize = 256, byte maxZoomLevel = 17)
+        public static int CalculateZoomLevel(double minLat, double maxLat, double minLon, double maxLon, int mapWidth, int mapHeight, byte maxZoomLevel = 19)
         {
+            // fixed for OpenStreetMap API
+            double tileSize = 256;
             // Calculate bounding box dimensions in degrees
             double boundingBoxWidth = maxLon - minLon;
             double boundingBoxHeight = maxLat - minLat;

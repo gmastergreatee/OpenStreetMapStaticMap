@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OSMStaticMap\OSMStaticMap.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="spotlight_pin_v4_dot-2-medium.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

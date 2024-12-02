@@ -1,6 +1,6 @@
 ﻿namespace OpenStreetMapStaticMaps
 {
-    partial class Form1
+    partial class MainWindow
     {
         /// <summary>
         ///  Required designer variable.
@@ -53,8 +53,11 @@
             label6 = new Label();
             txtMapWidth = new TextBox();
             txtMapHeight = new TextBox();
+            label1 = new Label();
+            numericMaxZoom = new NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)picMapImage).BeginInit();
             flowLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numericMaxZoom).BeginInit();
             SuspendLayout();
             // 
             // picMapImage
@@ -74,7 +77,7 @@
             txtZoom.Location = new Point(79, 367);
             txtZoom.Name = "txtZoom";
             txtZoom.Size = new Size(50, 23);
-            txtZoom.TabIndex = 2;
+            txtZoom.TabIndex = 0;
             // 
             // txtLon1
             // 
@@ -82,7 +85,7 @@
             txtLon1.Location = new Point(79, 425);
             txtLon1.Name = "txtLon1";
             txtLon1.Size = new Size(78, 23);
-            txtLon1.TabIndex = 3;
+            txtLon1.TabIndex = 5;
             txtLon1.Text = "-122.09056272817681";
             // 
             // txtLat1
@@ -100,7 +103,7 @@
             btnDrawIt.Location = new Point(12, 454);
             btnDrawIt.Name = "btnDrawIt";
             btnDrawIt.Size = new Size(650, 23);
-            btnDrawIt.TabIndex = 5;
+            btnDrawIt.TabIndex = 18;
             btnDrawIt.Text = "Draw It";
             btnDrawIt.UseVisualStyleBackColor = true;
             btnDrawIt.Click += btnDrawIt_Click;
@@ -141,7 +144,7 @@
             txtLat2.Location = new Point(163, 396);
             txtLat2.Name = "txtLat2";
             txtLat2.Size = new Size(78, 23);
-            txtLat2.TabIndex = 10;
+            txtLat2.TabIndex = 6;
             txtLat2.Text = "37.391793559006139";
             // 
             // txtLon2
@@ -150,7 +153,7 @@
             txtLon2.Location = new Point(163, 425);
             txtLon2.Name = "txtLon2";
             txtLon2.Size = new Size(78, 23);
-            txtLon2.TabIndex = 11;
+            txtLon2.TabIndex = 7;
             txtLon2.Text = "-122.09128697590819";
             // 
             // txtLon3
@@ -159,7 +162,7 @@
             txtLon3.Location = new Point(247, 425);
             txtLon3.Name = "txtLon3";
             txtLon3.Size = new Size(78, 23);
-            txtLon3.TabIndex = 13;
+            txtLon3.TabIndex = 9;
             txtLon3.Text = "-122.07572972671227";
             // 
             // txtLat3
@@ -168,7 +171,7 @@
             txtLat3.Location = new Point(247, 396);
             txtLat3.Name = "txtLat3";
             txtLat3.Size = new Size(78, 23);
-            txtLat3.TabIndex = 12;
+            txtLat3.TabIndex = 8;
             txtLat3.Text = "37.383503387444222";
             // 
             // txtLon4
@@ -177,7 +180,7 @@
             txtLon4.Location = new Point(331, 425);
             txtLon4.Name = "txtLon4";
             txtLon4.Size = new Size(78, 23);
-            txtLon4.TabIndex = 15;
+            txtLon4.TabIndex = 11;
             // 
             // txtLat4
             // 
@@ -185,7 +188,7 @@
             txtLat4.Location = new Point(331, 396);
             txtLat4.Name = "txtLat4";
             txtLat4.Size = new Size(78, 23);
-            txtLat4.TabIndex = 14;
+            txtLat4.TabIndex = 10;
             // 
             // txtLon5
             // 
@@ -193,7 +196,7 @@
             txtLon5.Location = new Point(415, 425);
             txtLon5.Name = "txtLon5";
             txtLon5.Size = new Size(78, 23);
-            txtLon5.TabIndex = 17;
+            txtLon5.TabIndex = 13;
             // 
             // txtLat5
             // 
@@ -201,7 +204,7 @@
             txtLat5.Location = new Point(415, 396);
             txtLat5.Name = "txtLat5";
             txtLat5.Size = new Size(78, 23);
-            txtLat5.TabIndex = 16;
+            txtLat5.TabIndex = 12;
             // 
             // txtLon6
             // 
@@ -209,7 +212,7 @@
             txtLon6.Location = new Point(499, 425);
             txtLon6.Name = "txtLon6";
             txtLon6.Size = new Size(78, 23);
-            txtLon6.TabIndex = 19;
+            txtLon6.TabIndex = 15;
             // 
             // txtLat6
             // 
@@ -217,7 +220,7 @@
             txtLat6.Location = new Point(499, 396);
             txtLat6.Name = "txtLat6";
             txtLat6.Size = new Size(78, 23);
-            txtLat6.TabIndex = 18;
+            txtLat6.TabIndex = 14;
             // 
             // txtLon7
             // 
@@ -225,7 +228,7 @@
             txtLon7.Location = new Point(583, 425);
             txtLon7.Name = "txtLon7";
             txtLon7.Size = new Size(78, 23);
-            txtLon7.TabIndex = 21;
+            txtLon7.TabIndex = 17;
             // 
             // txtLat7
             // 
@@ -233,7 +236,7 @@
             txtLat7.Location = new Point(583, 396);
             txtLat7.Name = "txtLat7";
             txtLat7.Size = new Size(78, 23);
-            txtLat7.TabIndex = 20;
+            txtLat7.TabIndex = 16;
             // 
             // flowLayoutPanel1
             // 
@@ -248,9 +251,9 @@
             // 
             // label5
             // 
-            label5.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            label5.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label5.AutoSize = true;
-            label5.Location = new Point(202, 370);
+            label5.Location = new Point(370, 370);
             label5.Name = "label5";
             label5.Size = new Size(39, 15);
             label5.TabIndex = 24;
@@ -258,9 +261,9 @@
             // 
             // label6
             // 
-            label6.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            label6.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label6.AutoSize = true;
-            label6.Location = new Point(366, 370);
+            label6.Location = new Point(534, 370);
             label6.Name = "label6";
             label6.Size = new Size(43, 15);
             label6.TabIndex = 25;
@@ -268,27 +271,50 @@
             // 
             // txtMapWidth
             // 
-            txtMapWidth.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            txtMapWidth.Location = new Point(247, 367);
+            txtMapWidth.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            txtMapWidth.Location = new Point(415, 367);
             txtMapWidth.Name = "txtMapWidth";
             txtMapWidth.Size = new Size(78, 23);
-            txtMapWidth.TabIndex = 26;
+            txtMapWidth.TabIndex = 2;
             txtMapWidth.Text = "456";
             // 
             // txtMapHeight
             // 
-            txtMapHeight.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            txtMapHeight.Location = new Point(415, 367);
+            txtMapHeight.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            txtMapHeight.Location = new Point(583, 367);
             txtMapHeight.Name = "txtMapHeight";
             txtMapHeight.Size = new Size(78, 23);
-            txtMapHeight.TabIndex = 27;
+            txtMapHeight.TabIndex = 3;
             txtMapHeight.Text = "343";
             // 
-            // Form1
+            // label1
+            // 
+            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            label1.AutoSize = true;
+            label1.Location = new Point(179, 369);
+            label1.Name = "label1";
+            label1.Size = new Size(62, 15);
+            label1.TabIndex = 28;
+            label1.Text = "MaxZoom";
+            // 
+            // numericMaxZoom
+            // 
+            numericMaxZoom.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            numericMaxZoom.Location = new Point(247, 367);
+            numericMaxZoom.Maximum = new decimal(new int[] { 19, 0, 0, 0 });
+            numericMaxZoom.Minimum = new decimal(new int[] { 8, 0, 0, 0 });
+            numericMaxZoom.Name = "numericMaxZoom";
+            numericMaxZoom.Size = new Size(78, 23);
+            numericMaxZoom.TabIndex = 1;
+            numericMaxZoom.Value = new decimal(new int[] { 14, 0, 0, 0 });
+            // 
+            // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(674, 489);
+            Controls.Add(numericMaxZoom);
+            Controls.Add(label1);
             Controls.Add(txtMapHeight);
             Controls.Add(txtMapWidth);
             Controls.Add(label6);
@@ -314,12 +340,13 @@
             Controls.Add(txtLon1);
             Controls.Add(txtZoom);
             FormBorderStyle = FormBorderStyle.FixedSingle;
-            Name = "Form1";
+            Name = "MainWindow";
             SizeGripStyle = SizeGripStyle.Hide;
             Text = "MapImageDisplayer";
             ((System.ComponentModel.ISupportInitialize)picMapImage).EndInit();
             flowLayoutPanel1.ResumeLayout(false);
             flowLayoutPanel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numericMaxZoom).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -351,5 +378,7 @@
         private Label label6;
         private TextBox txtMapWidth;
         private TextBox txtMapHeight;
+        private Label label1;
+        private NumericUpDown numericMaxZoom;
     }
 }

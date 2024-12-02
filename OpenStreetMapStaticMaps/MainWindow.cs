@@ -1,20 +1,20 @@
-using OpenStreetMapStaticMaps.Core;
-using OpenStreetMapStaticMaps.Core.Models;
+
+using OSMStaticMap.Models;
 
 namespace OpenStreetMapStaticMaps
 {
-    public partial class Form1 : Form
+    public partial class MainWindow : Form
     {
-        private List<CoordinatesModel> coordinateList = new List<CoordinatesModel>();
-        private OSMStaticMap mapper;
+        private List<CoordinatesModel> coordinateList = new();
+        private OSMStaticMap.OSMStaticMap mapper;
 
         private int ImageWidth = 512;
         private int ImageHeight = 512;
 
-        public Form1()
+        public MainWindow()
         {
             InitializeComponent();
-            mapper = new OSMStaticMap(
+            mapper = new OSMStaticMap.OSMStaticMap(
                 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 this.ImageWidth,
                 this.ImageHeight
@@ -31,6 +31,8 @@ namespace OpenStreetMapStaticMaps
                 var pinImage = Bitmap.FromFile("./spotlight_pin_v4_dot-2-medium.png");
                 mapper.ImageWidth = this.ImageWidth;
                 mapper.ImageHeight = this.ImageHeight;
+                mapper.ZoomLevel = 0;
+                mapper.MaxZoom = Convert.ToByte(numericMaxZoom.Value);
 
                 coordinateList.ForEach(coord =>
                 {

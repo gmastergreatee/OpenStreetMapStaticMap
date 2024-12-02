@@ -1,6 +1,6 @@
-﻿namespace OpenStreetMapStaticMaps.Core.Models
+﻿namespace OSMStaticMap.Models
 {
-    internal class CoordinatesModel
+    public class CoordinatesModel
     {
         public float LatitudeDegrees { get; set; }
         public float LongitudeDegrees { get; set; }

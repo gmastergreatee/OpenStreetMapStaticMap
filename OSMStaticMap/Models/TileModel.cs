@@ -1,6 +1,8 @@
-﻿namespace OpenStreetMapStaticMaps.Core.Models
+﻿using System.Drawing;
+
+namespace OSMStaticMap.Models
 {
-    internal class TileModel
+    public class TileModel
     {
         public Point RenderOffset { get; set; }
 
