@@ -20,7 +20,7 @@ namespace OpenStreetMapStaticMaps.Core
             this.ZoomLevel = zoom > 0 ? Math.Min(zoom, 19) : 0;
         }
 
-        public async Task<Image> PlotMapAsync(List<CoordinatesModel> coordinates, Image pinImage = null)
+        public async Task<Image> PlotMapAsync(List<CoordinatesModel> coordinates, Image? pinImage = null)
         {
             var minLatitude = coordinates.Min(i => i.LatitudeDegrees);
             var minLongitude = coordinates.Min(i => i.LongitudeDegrees);
