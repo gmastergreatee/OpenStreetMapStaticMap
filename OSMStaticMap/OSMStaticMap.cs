@@ -240,8 +240,8 @@ namespace OSMStaticMap
 
                 if (coord.ShowPin && tile != null)
                 {
-                    var x_in_tile = 256 * (pinTilePos.X - Math.Round(pinTilePos.X, MidpointRounding.ToZero));
-                    var y_in_tile = 256 * (pinTilePos.Y - Math.Round(pinTilePos.Y, MidpointRounding.ToZero));
+                    var x_in_tile = 256 * (pinTilePos.X - Math.Floor(pinTilePos.X));
+                    var y_in_tile = 256 * (pinTilePos.Y - Math.Floor(pinTilePos.Y));
 
                     var pinPosInImage = new PointF(
                         Convert.ToInt32((tile.RenderOffset.X * 256) + x_in_tile),
