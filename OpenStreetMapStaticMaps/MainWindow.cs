@@ -154,6 +154,45 @@ namespace OpenStreetMapStaticMaps
 
             try
             {
+                if (txtLon8.Text.Length > 0 && txtLat8.Text.Length > 0)
+                {
+                    coordinateList.Add(new CoordinatesModel()
+                    {
+                        LatitudeDegrees = Convert.ToSingle(txtLat8.Text),
+                        LongitudeDegrees = Convert.ToSingle(txtLon8.Text)
+                    });
+                }
+            }
+            catch { }
+
+            try
+            {
+                if (txtLon9.Text.Length > 0 && txtLat9.Text.Length > 0)
+                {
+                    coordinateList.Add(new CoordinatesModel()
+                    {
+                        LatitudeDegrees = Convert.ToSingle(txtLat9.Text),
+                        LongitudeDegrees = Convert.ToSingle(txtLon9.Text)
+                    });
+                }
+            }
+            catch { }
+
+            try
+            {
+                if (txtLon10.Text.Length > 0 && txtLat10.Text.Length > 0)
+                {
+                    coordinateList.Add(new CoordinatesModel()
+                    {
+                        LatitudeDegrees = Convert.ToSingle(txtLat10.Text),
+                        LongitudeDegrees = Convert.ToSingle(txtLon10.Text)
+                    });
+                }
+            }
+            catch { }
+
+            try
+            {
                 this.ImageWidth = Convert.ToInt32(txtMapWidth.Text);
             }
             catch

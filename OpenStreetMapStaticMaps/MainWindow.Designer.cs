@@ -55,6 +55,12 @@
             txtMapHeight = new TextBox();
             label1 = new Label();
             numericMaxZoom = new NumericUpDown();
+            txtLon8 = new TextBox();
+            txtLat8 = new TextBox();
+            txtLon9 = new TextBox();
+            txtLat9 = new TextBox();
+            txtLon10 = new TextBox();
+            txtLat10 = new TextBox();
             ((System.ComponentModel.ISupportInitialize)picMapImage).BeginInit();
             flowLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericMaxZoom).BeginInit();
@@ -86,7 +92,7 @@
             txtLon1.Name = "txtLon1";
             txtLon1.Size = new Size(78, 23);
             txtLon1.TabIndex = 5;
-            txtLon1.Text = "-122.09056272817681";
+            txtLon1.Text = "-121.8775";
             // 
             // txtLat1
             // 
@@ -95,14 +101,14 @@
             txtLat1.Name = "txtLat1";
             txtLat1.Size = new Size(78, 23);
             txtLat1.TabIndex = 4;
-            txtLat1.Text = "37.387879045618661";
+            txtLat1.Text = "37.30941";
             // 
             // btnDrawIt
             // 
             btnDrawIt.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             btnDrawIt.Location = new Point(12, 454);
             btnDrawIt.Name = "btnDrawIt";
-            btnDrawIt.Size = new Size(650, 23);
+            btnDrawIt.Size = new Size(903, 23);
             btnDrawIt.TabIndex = 18;
             btnDrawIt.Text = "Draw It";
             btnDrawIt.UseVisualStyleBackColor = true;
@@ -145,7 +151,7 @@
             txtLat2.Name = "txtLat2";
             txtLat2.Size = new Size(78, 23);
             txtLat2.TabIndex = 6;
-            txtLat2.Text = "37.391793559006139";
+            txtLat2.Text = "37.32635";
             // 
             // txtLon2
             // 
@@ -154,7 +160,7 @@
             txtLon2.Name = "txtLon2";
             txtLon2.Size = new Size(78, 23);
             txtLon2.TabIndex = 7;
-            txtLon2.Text = "-122.09128697590819";
+            txtLon2.Text = "-121.8977";
             // 
             // txtLon3
             // 
@@ -163,7 +169,7 @@
             txtLon3.Name = "txtLon3";
             txtLon3.Size = new Size(78, 23);
             txtLon3.TabIndex = 9;
-            txtLon3.Text = "-122.07572972671227";
+            txtLon3.Text = "-121.8966";
             // 
             // txtLat3
             // 
@@ -172,7 +178,7 @@
             txtLat3.Name = "txtLat3";
             txtLat3.Size = new Size(78, 23);
             txtLat3.TabIndex = 8;
-            txtLat3.Text = "37.383503387444222";
+            txtLat3.Text = "37.32073";
             // 
             // txtLon4
             // 
@@ -181,6 +187,7 @@
             txtLon4.Name = "txtLon4";
             txtLon4.Size = new Size(78, 23);
             txtLon4.TabIndex = 11;
+            txtLon4.Text = "-121.8791";
             // 
             // txtLat4
             // 
@@ -189,6 +196,7 @@
             txtLat4.Name = "txtLat4";
             txtLat4.Size = new Size(78, 23);
             txtLat4.TabIndex = 10;
+            txtLat4.Text = "37.30371";
             // 
             // txtLon5
             // 
@@ -197,6 +205,7 @@
             txtLon5.Name = "txtLon5";
             txtLon5.Size = new Size(78, 23);
             txtLon5.TabIndex = 13;
+            txtLon5.Text = "-122.0265";
             // 
             // txtLat5
             // 
@@ -205,6 +214,7 @@
             txtLat5.Name = "txtLat5";
             txtLat5.Size = new Size(78, 23);
             txtLat5.TabIndex = 12;
+            txtLat5.Text = "37.32671";
             // 
             // txtLon6
             // 
@@ -213,6 +223,7 @@
             txtLon6.Name = "txtLon6";
             txtLon6.Size = new Size(78, 23);
             txtLon6.TabIndex = 15;
+            txtLon6.Text = "-121.8848";
             // 
             // txtLat6
             // 
@@ -221,6 +232,7 @@
             txtLat6.Name = "txtLat6";
             txtLat6.Size = new Size(78, 23);
             txtLat6.TabIndex = 14;
+            txtLat6.Text = "37.33128";
             // 
             // txtLon7
             // 
@@ -229,6 +241,7 @@
             txtLon7.Name = "txtLon7";
             txtLon7.Size = new Size(78, 23);
             txtLon7.TabIndex = 17;
+            txtLon7.Text = "-121.8928";
             // 
             // txtLat7
             // 
@@ -237,6 +250,7 @@
             txtLat7.Name = "txtLat7";
             txtLat7.Size = new Size(78, 23);
             txtLat7.TabIndex = 16;
+            txtLat7.Text = "37.34907";
             // 
             // flowLayoutPanel1
             // 
@@ -246,7 +260,7 @@
             flowLayoutPanel1.Controls.Add(picMapImage);
             flowLayoutPanel1.Location = new Point(12, 12);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(649, 349);
+            flowLayoutPanel1.Size = new Size(902, 349);
             flowLayoutPanel1.TabIndex = 22;
             // 
             // label5
@@ -308,11 +322,71 @@
             numericMaxZoom.TabIndex = 1;
             numericMaxZoom.Value = new decimal(new int[] { 14, 0, 0, 0 });
             // 
+            // txtLon8
+            // 
+            txtLon8.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            txtLon8.Location = new Point(667, 425);
+            txtLon8.Name = "txtLon8";
+            txtLon8.Size = new Size(78, 23);
+            txtLon8.TabIndex = 30;
+            txtLon8.Text = "-121.8871";
+            // 
+            // txtLat8
+            // 
+            txtLat8.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            txtLat8.Location = new Point(667, 396);
+            txtLat8.Name = "txtLat8";
+            txtLat8.Size = new Size(78, 23);
+            txtLat8.TabIndex = 29;
+            txtLat8.Text = "37.33024";
+            // 
+            // txtLon9
+            // 
+            txtLon9.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            txtLon9.Location = new Point(751, 425);
+            txtLon9.Name = "txtLon9";
+            txtLon9.Size = new Size(78, 23);
+            txtLon9.TabIndex = 32;
+            txtLon9.Text = "-121.9553";
+            // 
+            // txtLat9
+            // 
+            txtLat9.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            txtLat9.Location = new Point(751, 396);
+            txtLat9.Name = "txtLat9";
+            txtLat9.Size = new Size(78, 23);
+            txtLat9.TabIndex = 31;
+            txtLat9.Text = "37.30141";
+            // 
+            // txtLon10
+            // 
+            txtLon10.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            txtLon10.Location = new Point(835, 425);
+            txtLon10.Name = "txtLon10";
+            txtLon10.Size = new Size(78, 23);
+            txtLon10.TabIndex = 34;
+            txtLon10.Text = "-121.9234";
+            // 
+            // txtLat10
+            // 
+            txtLat10.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            txtLat10.Location = new Point(835, 396);
+            txtLat10.Name = "txtLat10";
+            txtLat10.Size = new Size(78, 23);
+            txtLat10.TabIndex = 33;
+            txtLat10.Text = "37.34072";
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(674, 489);
+            ClientSize = new Size(927, 489);
+            Controls.Add(txtLon10);
+            Controls.Add(txtLat10);
+            Controls.Add(txtLon9);
+            Controls.Add(txtLat9);
+            Controls.Add(txtLon8);
+            Controls.Add(txtLat8);
             Controls.Add(numericMaxZoom);
             Controls.Add(label1);
             Controls.Add(txtMapHeight);
@@ -380,5 +454,11 @@
         private TextBox txtMapHeight;
         private Label label1;
         private NumericUpDown numericMaxZoom;
+        private TextBox txtLon8;
+        private TextBox txtLat8;
+        private TextBox txtLon9;
+        private TextBox txtLat9;
+        private TextBox txtLon10;
+        private TextBox txtLat10;
     }
 }

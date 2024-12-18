@@ -21,9 +21,9 @@ namespace OSMStaticMap
             this.ZoomLevel = 0;
         }
 
-        public Image PlotMap(IEnumerable<CoordinatesModel> coordinates, Image pinImage = null)
+        public Image PlotMap(IEnumerable<CoordinatesModel> coordinates, Image pinImage)
         {
-            this.ZoomLevel = this.CalculateZoom(coordinates, this.ImageWidth, this.ImageHeight);
+            this.ZoomLevel = this.CalculateZoom(coordinates, this.ImageWidth - pinImage.Width, this.ImageHeight - pinImage.Height);
 
             var maxTileCountPerAxis = Math.Pow(2, this.ZoomLevel);
             var tileMappingList = new List<TileModel>();
@@ -299,6 +299,10 @@ namespace OSMStaticMap
                 Math.Max(0, medianX - halfWidth),
                 Math.Max(0, medianY - halfHeight)
             );
+
+            // offset the map center according to pin-image's width and height
+            medianPosition.X = medianPosition.X > (pinImage.Width / 2) ? medianPosition.X + (pinImage.Width / 2) : medianPosition.X;
+            medianPosition.Y = medianPosition.Y > (pinImage.Height / 2) ? medianPosition.Y + (pinImage.Height / 2) : medianPosition.Y;
 
             return new ClippedRectangleModel()
             {
