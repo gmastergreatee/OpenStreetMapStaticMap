@@ -1,4 +1,5 @@
-﻿using OSMStaticMap.Helpers;
+﻿using Newtonsoft.Json;
+using OSMStaticMap.Helpers;
 using OSMStaticMap.Models;
 using System.Drawing;
 
@@ -14,13 +15,13 @@ namespace OSMStaticMap
 
         public OSMStaticMap(string URL, int imageWidth, int imageHeight)
         {
-            this.TileURL = URL;
+            this.TileURL = string.IsNullOrWhiteSpace(URL) ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png" : URL;
             this.ImageWidth = imageWidth;
             this.ImageHeight = imageHeight;
             this.ZoomLevel = 0;
         }
 
-        public async Task<Image> PlotMapAsync(List<CoordinatesModel> coordinates, Image? pinImage = null)
+        public Image PlotMap(IEnumerable<CoordinatesModel> coordinates, Image pinImage = null)
         {
             this.ZoomLevel = this.CalculateZoom(coordinates, this.ImageWidth, this.ImageHeight);
 
@@ -102,24 +103,27 @@ namespace OSMStaticMap
             );
             var clipRectObject = this.GetClipRectangle(tileList, coordinates, pinImage, bitMap.Width, bitMap.Height);
 
-            await Parallel.ForEachAsync(tileList, async (tile, cancellationToken) =>
+            var result = Task.Run(async () =>
             {
-                // filter out unused tiles
-                if (this.IsTileWithinRect(tile, clipRectObject.ClippedRectangle))
+                for (var i = 0; i < tileList.Count; i++)
                 {
-                    tile.TileImage = await this.GetMapTile(tile);
+                    var tile = tileList[i];
+                    // filter out unused tiles
+                    if (this.IsTileWithinRect(tile, clipRectObject.ClippedRectangle))
+                    {
+                        tile.TileImage = await this.GetMapTile(tile);
+                    }
                 }
-            });
+
+                return true;
+            }).ConfigureAwait(false);
+
+            var fetchTileimages = result.GetAwaiter().GetResult();
 
             return DrawTileBitmap(bitMap, tileList, coordinates, clipRectObject, pinImage);
         }
 
-        public Image PlotMap(List<CoordinatesModel> coordinates, Image? pinImage = null)
-        {
-            return PlotMapAsync(coordinates, pinImage).GetAwaiter().GetResult();
-        }
-
-        private int CalculateZoom(List<CoordinatesModel> coordinates, int imageWidth, int imageHeight)
+        private int CalculateZoom(IEnumerable<CoordinatesModel> coordinates, int imageWidth, int imageHeight)
         {
             var tempZoom = this.ZoomLevel;
             if (this.ZoomLevel <= 0)
@@ -161,7 +165,7 @@ namespace OSMStaticMap
                     req.Headers.UserAgent.Add(System.Net.Http.Headers.ProductInfoHeaderValue.Parse("Chrome/131.0.0.0"));
                     req.Headers.UserAgent.Add(System.Net.Http.Headers.ProductInfoHeaderValue.Parse("Safari/537.36"));
                     var response = await hc.SendAsync(req);
-                    var imageStream = response.Content.ReadAsStream();
+                    var imageStream = await response.Content.ReadAsStreamAsync();
                     return Bitmap.FromStream(imageStream);
                 }
             }
@@ -185,46 +189,60 @@ namespace OSMStaticMap
             );
         }
 
-        private Image DrawTileBitmap(Bitmap bitMap, List<TileModel> tiles, List<CoordinatesModel> coordinates, ClippedRectangleModel clipRectObject, Image? pinImage)
+        private Image DrawTileBitmap(Bitmap bitMap, IEnumerable<TileModel> tiles, IEnumerable<CoordinatesModel> coordinates, ClippedRectangleModel clipRectObject, Image pinImage)
         {
-            if (tiles == null || tiles.Count <= 0 || coordinates == null || coordinates.Count <= 0)
+            if (tiles == null || tiles.Count() <= 0 || coordinates == null || coordinates.Count() <= 0)
             {
                 return new Bitmap(this.ImageWidth, this.ImageHeight);
             }
 
-            var g = Graphics.FromImage(bitMap);
-
-            // draw map tiles
-            foreach (var tile in tiles)
+            using (var g = Graphics.FromImage(bitMap))
             {
-                if (tile.TileImage != null)
+                // draw map tiles
+                foreach (var tile in tiles)
                 {
-                    g.DrawImage(tile.TileImage, new Point(256 * tile.RenderOffset.X, 256 * tile.RenderOffset.Y));
+                    if (tile.TileImage != null)
+                    {
+                        g.DrawImage(tile.TileImage, new Point(256 * tile.RenderOffset.X, 256 * tile.RenderOffset.Y));
+                    }
+                }
+
+                // draw pins
+                if (pinImage != null && clipRectObject.PinPositions.Count > 0)
+                {
+                    foreach (var pin in clipRectObject.PinPositions)
+                    {
+                        g.DrawImage(
+                            pinImage,
+                            pin
+                        );
+                    }
                 }
             }
 
-            // draw pins
-            if (pinImage != null && clipRectObject.PinPositions.Count > 0)
+            var finalRectangleClip = new RectangleF(
+                clipRectObject.ClippedRectangle.X,
+                clipRectObject.ClippedRectangle.Y,
+                clipRectObject.ClippedRectangle.Width,
+                clipRectObject.ClippedRectangle.Height
+            );
+
+            if (bitMap.Width < clipRectObject.ClippedRectangle.X + clipRectObject.ClippedRectangle.Width)
             {
-                foreach (var pin in clipRectObject.PinPositions)
-                {
-                    g.DrawImage(
-                        pinImage,
-                        pin
-                    );
-                }
+                finalRectangleClip.Width = Math.Min(bitMap.Width, finalRectangleClip.Width);
+                finalRectangleClip.X = bitMap.Width - finalRectangleClip.Width;
             }
 
-            // dont cutout map if calculated map dimensions are smaller than required
-            if (bitMap.Width < clipRectObject.ClippedRectangle.Width || bitMap.Height < clipRectObject.ClippedRectangle.Height)
+            if (bitMap.Height < clipRectObject.ClippedRectangle.Y + clipRectObject.ClippedRectangle.Height)
             {
-                return bitMap;
+                finalRectangleClip.Height = Math.Min(bitMap.Height, finalRectangleClip.Height);
+                finalRectangleClip.Y = bitMap.Height - finalRectangleClip.Height;
             }
 
-            return bitMap.Clone(clipRectObject.ClippedRectangle, bitMap.PixelFormat);
+            return bitMap.Clone(finalRectangleClip, bitMap.PixelFormat);
         }
 
-        private ClippedRectangleModel GetClipRectangle(List<TileModel> tiles, List<CoordinatesModel> coordinates, Image? pinImage, int imageWidth, int imageHeight)
+        private ClippedRectangleModel GetClipRectangle(IEnumerable<TileModel> tiles, IEnumerable<CoordinatesModel> coordinates, Image pinImage, int imageWidth, int imageHeight)
         {
             var positionsToKeepInMap = new List<PointF>();
             var pinPositionsInMap = new List<PointF>();
@@ -293,5 +311,120 @@ namespace OSMStaticMap
                 PinPositions = pinPositionsInMap,
             };
         }
+
+        #region Static methods
+        public static IEnumerable<CoordinatesModel> GetCoordinates(IEnumerable<string> addresses)
+        {
+            var coordinates = new List<PointF>();
+            var lastQueryTimestamp = DateTime.Now;
+            var result = Task.Run(async () =>
+            {
+                foreach (var address in addresses)
+                {
+                    try
+                    {
+                        using (var hc = new HttpClient())
+                        {
+                            hc.DefaultRequestHeaders.UserAgent.ParseAdd("Chrome/131.0.0.0");
+                            var url = $"https://nominatim.openstreetmap.org/search?format=json&limit=1&q={Uri.EscapeDataString(address)}";
+
+                            // nominatim.openstreetmap.org/search
+                            // enforces at-most 1 request per second
+                            // else it blocks the application based on the UserAgent
+                            // https://operations.osmfoundation.org/policies/nominatim/
+                            // -- change the user-agent if you are blocked
+                            var durationFromLastQuery = DateTime.Now - lastQueryTimestamp;
+                            while (durationFromLastQuery.TotalSeconds < 1)
+                            {
+                                Thread.Sleep(100);
+                                durationFromLastQuery = DateTime.Now - lastQueryTimestamp;
+                            }
+
+                            var response = await hc.GetAsync(url);
+                            var content = await response.Content.ReadAsStringAsync();
+                            lastQueryTimestamp = DateTime.Now;
+
+                            var data = JsonConvert.DeserializeObject<List<dynamic>>(content);
+                            if (data != null && data.Count > 0)
+                            {
+                                coordinates.Add(new PointF(Convert.ToSingle(data[0].lat), Convert.ToSingle(data[0].lon)));
+                            }
+                        }
+                    }
+                    catch (Exception ex) { }
+                }
+                return true;
+            });
+            var fetchCoordinates = result.GetAwaiter().GetResult();
+            return coordinates.Select(i => CoordinatesModel.FromPointF(i));
+        }
+
+        /// <summary>
+        /// Gets the coordinates and returns model collection of those which were modified
+        /// </summary>
+        /// <typeparam name="T">ICoordinates object</typeparam>
+        /// <param name="modelsToCheckCoordinatesFor">The model collection to check for</param>
+        /// <returns>Collection containing models that were modified</returns>
+        public static IEnumerable<T> GetCoordinates<T>(IEnumerable<T> modelsToCheckCoordinatesFor)
+            where T : ICoordinates
+        {
+            var modifiedModels = new List<T>();
+            foreach (var model in modelsToCheckCoordinatesFor)
+            {
+                if (model.Latitude == null || model.Longitude == null)
+                {
+                    var _address = model.GetAddress();
+                    var coordinates = OSMStaticMap.GetCoordinates(new List<string> { _address });
+                    if (coordinates.Count() > 0)
+                    {
+                        model.Latitude = coordinates.FirstOrDefault().LatitudeDegrees.ToString();
+                        model.Longitude = coordinates.FirstOrDefault().LongitudeDegrees.ToString();
+                    }
+                    else
+                    {
+                        model.Latitude = "NOT FOUND";
+                        model.Longitude = "NOT FOUND";
+                    }
+                    modifiedModels.Add(model);
+                }
+            }
+            return modifiedModels;
+        }
+
+        public static string GetMapBase64StringFromAddresses(IEnumerable<string> addresses, string markerIconPath, int imageWidth = 1050, int imageHeight = 520)
+        {
+            var coordinates = OSMStaticMap.GetCoordinates(addresses);
+            return GetMapBase64StringFromLatLong(coordinates, markerIconPath, imageWidth, imageHeight);
+        }
+
+        public static string GetMapBase64StringFromLatLong(IEnumerable<CoordinatesModel> coordinates, string markerIconPath, int imageWidth = 1050, int imageHeight = 520)
+        {
+            if (coordinates.Count() > 0 && !string.IsNullOrWhiteSpace(markerIconPath))
+            {
+                var pinImage = Bitmap.FromFile(markerIconPath);
+                var osmMapObject = new OSMStaticMap(null, imageWidth, imageHeight)
+                {
+                    MaxZoom = 16
+                };
+
+                var fullImage = osmMapObject.PlotMap(
+                    coordinates,
+                    pinImage
+                );
+
+                using (var ms = new MemoryStream())
+                {
+                    fullImage.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    var imageBytes = ms.ToArray();
+
+                    if (imageBytes.Length > 0)
+                    {
+                        return Convert.ToBase64String(imageBytes);
+                    }
+                }
+            }
+            return null;
+        }
+        #endregion
     }
 }

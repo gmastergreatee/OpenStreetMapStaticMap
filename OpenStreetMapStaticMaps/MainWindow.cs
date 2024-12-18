@@ -39,9 +39,9 @@ namespace OpenStreetMapStaticMaps
                     coord.ShowPin = true;
                 });
 
-                Task.Run(async () =>
+                Task.Run(() =>
                 {
-                    var img = await mapper.PlotMapAsync(coordinateList, pinImage);
+                    var img = mapper.PlotMap(coordinateList, pinImage);
                     this.Invoke(() =>
                     {
                         picMapImage.Image = img;
