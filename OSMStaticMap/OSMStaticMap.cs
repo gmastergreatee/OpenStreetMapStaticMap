@@ -56,24 +56,25 @@ namespace OSMStaticMap
             );
 
             #region Extend map boundary by 1 tile on all sides
+            var extendedBoundary = Convert.ToInt32(this.ZoomLevel / 6.0);
             if (mapStartTilePoint.X > 0)
             {
-                mapStartTilePoint.X -= 1;
+                mapStartTilePoint.X -= extendedBoundary;
             }
 
             if (mapEndTilePoint.X < maxTileCountPerAxis)
             {
-                mapEndTilePoint.X += 1;
+                mapEndTilePoint.X += extendedBoundary;
             }
 
             if (mapStartTilePoint.Y > 0)
             {
-                mapStartTilePoint.Y -= 1;
+                mapStartTilePoint.Y -= extendedBoundary;
             }
 
             if (mapEndTilePoint.Y < maxTileCountPerAxis)
             {
-                mapEndTilePoint.Y += 1;
+                mapEndTilePoint.Y += extendedBoundary;
             }
             #endregion
 
