@@ -286,15 +286,13 @@ namespace OSMStaticMap
             float medianX = 0;
             float medianY = 0;
 
-            if (pinPositionsInMap.Count > 0)
+            medianX = (positionsToKeepInMap.Max(i => i.X) + positionsToKeepInMap.Min(i => i.X)) / 2;
+            medianY = ((positionsToKeepInMap.Max(i => i.Y) + positionsToKeepInMap.Min(i => i.Y)) / 2);
+
+            // offset the map center according to pin-image's width and height
+            if (pinImage != null)
             {
-                medianX = (pinPositionsInMap.Max(i => i.X) + pinPositionsInMap.Min(i => i.X)) / 2;
-                medianY = (pinPositionsInMap.Max(i => i.Y) + pinPositionsInMap.Min(i => i.Y)) / 2;
-            }
-            else
-            {
-                medianX = (positionsToKeepInMap.Max(i => i.X) + positionsToKeepInMap.Min(i => i.X)) / 2;
-                medianY = (positionsToKeepInMap.Max(i => i.Y) + positionsToKeepInMap.Min(i => i.Y)) / 2;
+                medianY -= pinImage.Height / 2;
             }
 
             var halfWidth = this.ImageWidth / 2;
@@ -305,9 +303,6 @@ namespace OSMStaticMap
                 Math.Max(0, medianY - halfHeight)
             );
 
-            // offset the map center according to pin-image's width and height
-            medianPosition.X = medianPosition.X > (pinImage.Width / 2) ? medianPosition.X + (pinImage.Width / 2) : medianPosition.X;
-            medianPosition.Y = medianPosition.Y > (pinImage.Height / 2) ? medianPosition.Y + (pinImage.Height / 2) : medianPosition.Y;
 
             return new ClippedRectangleModel()
             {
