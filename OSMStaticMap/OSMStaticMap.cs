@@ -23,7 +23,11 @@ namespace OSMStaticMap
 
         public Image PlotMap(IEnumerable<CoordinatesModel> coordinates, Image pinImage)
         {
-            this.ZoomLevel = this.CalculateZoom(coordinates, this.ImageWidth - pinImage.Width, this.ImageHeight - pinImage.Height);
+            this.ZoomLevel = this.CalculateZoom(
+                coordinates,
+                this.ImageWidth - (pinImage != null ? pinImage.Width / 2 : 0),
+                this.ImageHeight - (pinImage != null ? pinImage.Height / 2 : 0)
+            );
 
             var maxTileCountPerAxis = Math.Pow(2, this.ZoomLevel);
             var tileMappingList = new List<TileModel>();
