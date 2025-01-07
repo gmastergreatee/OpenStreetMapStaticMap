@@ -228,10 +228,10 @@ namespace OSMStaticMap
                     var pinLabelFontFamily = new FontFamily("Consolas");
                     var pinLabelFontStyle = FontStyle.Bold;
                     var pinLabelFontSize = 16;
-                    var pinLabelColor = Color.Red;
+                    var pinLabelColor = Color.LimeGreen;
 
                     var pinLabelBorderFontSize = (g.DpiY * pinLabelFontSize) / 72;
-                    var pinLabelBorderWidth = 1.5F;
+                    var pinLabelBorderWidth = 2F;
                     var pinLabelBorderColor = Color.Black;
 
                     // ----------------------------------------------------------------------------
