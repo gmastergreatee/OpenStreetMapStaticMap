@@ -34,10 +34,32 @@ namespace OpenStreetMapStaticMaps
                 mapper.ZoomLevel = 0;
                 mapper.MaxZoom = Convert.ToByte(numericMaxZoom.Value);
 
-                coordinateList.ForEach(coord =>
+                for (var i = 0; i < coordinateList.Count; i++)
                 {
-                    coord.ShowPin = true;
-                });
+                    coordinateList[i].ShowPin = true;
+                    coordinateList[i].PinLabel = (i + 1).ToString();
+
+                    //// center
+                    //// this is by default, only need to set PinPositionOffset if required
+                    //coordinateList[i].PinPosition = PinLabelPositionEnum.Center;
+                    //coordinateList[i].PinPositionOffset = new PointF(0, -10);
+
+                    // top
+                    coordinateList[i].PinPosition = PinLabelPositionEnum.Top;
+                    coordinateList[i].PinPositionOffset = new PointF(0, -25);
+
+                    //// left
+                    //coordinateList[i].PinPosition = PinLabelPositionEnum.Left;
+                    //coordinateList[i].PinPositionOffset = new PointF(0, -8);
+
+                    //// right
+                    //coordinateList[i].PinPosition = PinLabelPositionEnum.Right;
+                    //coordinateList[i].PinPositionOffset = new PointF(0, -8);
+
+                    //// bottom
+                    //coordinateList[i].PinPosition = PinLabelPositionEnum.Bottom;
+                    //coordinateList[i].PinPositionOffset = new PointF(0, 0);
+                }
 
                 Task.Run(() =>
                 {
