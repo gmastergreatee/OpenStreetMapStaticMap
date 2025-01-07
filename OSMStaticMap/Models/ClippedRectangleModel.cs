@@ -5,6 +5,6 @@ namespace OSMStaticMap.Models
     internal class ClippedRectangleModel
     {
         public RectangleF ClippedRectangle { get; set; }
-        public List<PointF> PinPositions { get; set; } = new List<PointF>();
+        public List<PinPosition> PinPositions { get; set; } = new List<PinPosition>();
     }
 }

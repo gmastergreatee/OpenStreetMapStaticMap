@@ -8,6 +8,9 @@ namespace OSMStaticMap.Models
         public float LongitudeDegrees { get; set; }
 
         public bool ShowPin { get; set; } = false;
+        public string PinLabel { get; set; } = "";
+        public PinLabelPositionEnum PinPosition { get; set; } = PinLabelPositionEnum.Center;
+        public PointF PinPositionOffset { get; set; } = new PointF(0, 0);
 
         public static CoordinatesModel FromPointF(PointF point)
         {

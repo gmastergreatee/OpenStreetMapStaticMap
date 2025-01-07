@@ -2,6 +2,8 @@
 using OSMStaticMap.Helpers;
 using OSMStaticMap.Models;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 
 namespace OSMStaticMap
 {
@@ -12,13 +14,15 @@ namespace OSMStaticMap
         public int ImageHeight { get; set; }
         public int ZoomLevel { get; set; }
         public byte MaxZoom { get; set; }
+        public bool DrawPinLabels { get; set; }
 
-        public OSMStaticMap(string URL, int imageWidth, int imageHeight)
+        public OSMStaticMap(string URL, int imageWidth, int imageHeight, bool drawPinLabels = true)
         {
             this.TileURL = string.IsNullOrWhiteSpace(URL) ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png" : URL;
             this.ImageWidth = imageWidth;
             this.ImageHeight = imageHeight;
             this.ZoomLevel = 0;
+            this.DrawPinLabels = drawPinLabels;
         }
 
         public Image PlotMap(IEnumerable<CoordinatesModel> coordinates, Image pinImage)
@@ -203,6 +207,11 @@ namespace OSMStaticMap
 
             using (var g = Graphics.FromImage(bitMap))
             {
+                g.InterpolationMode = InterpolationMode.High;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                g.CompositingQuality = CompositingQuality.HighQuality;
+
                 // draw map tiles
                 foreach (var tile in tiles)
                 {
@@ -215,12 +224,67 @@ namespace OSMStaticMap
                 // draw pins
                 if (pinImage != null && clipRectObject.PinPositions.Count > 0)
                 {
-                    foreach (var pin in clipRectObject.PinPositions)
+                    /// [TODO] : need to out-source this part to be passed from outside the library
+                    var pinLabelFontFamily = new FontFamily("Consolas");
+                    var pinLabelFontStyle = FontStyle.Bold;
+                    var pinLabelFontSize = 16;
+                    var pinLabelColor = Color.Red;
+
+                    var pinLabelBorderFontSize = (g.DpiY * pinLabelFontSize) / 72;
+                    var pinLabelBorderWidth = 1.5F;
+                    var pinLabelBorderColor = Color.Black;
+
+                    // ----------------------------------------------------------------------------
+
+                    var pinLabelBrush = new SolidBrush(pinLabelColor);
+                    var pinLabelBorderPen = new Pen(pinLabelBorderColor, pinLabelBorderWidth);
+                    var pinLabelFont = new Font(pinLabelFontFamily, pinLabelFontSize, pinLabelFontStyle);
+
+                    foreach (var pinPosition in clipRectObject.PinPositions)
                     {
-                        g.DrawImage(
-                            pinImage,
-                            pin
-                        );
+                        // for pinPosition-image
+                        g.DrawImage(pinImage, pinPosition.Point);
+
+                        if (this.DrawPinLabels && !string.IsNullOrWhiteSpace(pinPosition.Label))
+                        {
+                            var text_size = g.MeasureString(pinPosition.Label, pinLabelFont);
+
+                            // this is for center
+                            var pinLabel_x = pinPosition.LabelPoint.X - (text_size.Width / 2);
+                            var pinLabel_y = pinPosition.LabelPoint.Y - (text_size.Height / 4);
+
+                            switch (pinPosition.LabelPosition)
+                            {
+                                case PinLabelPositionEnum.Top:
+                                    pinLabel_y = pinPosition.Point.Y;
+                                    break;
+                                case PinLabelPositionEnum.Bottom:
+                                    pinLabel_y = pinPosition.Point.Y + pinImage.Height;
+                                    break;
+                                case PinLabelPositionEnum.Left:
+                                    pinLabel_x = pinPosition.Point.X - text_size.Width;
+                                    break;
+                                case PinLabelPositionEnum.Right:
+                                    pinLabel_x = pinPosition.Point.X + pinImage.Width;
+                                    break;
+                                case PinLabelPositionEnum.Center:
+                                default:
+                                    break;
+                            }
+
+                            var finalPinLabelPoint = new PointF(
+                                pinLabel_x + pinPosition.PinPositionOffset.X,
+                                pinLabel_y + pinPosition.PinPositionOffset.Y
+                            );
+
+                            var path = new GraphicsPath();
+                            path.AddString(pinPosition.Label, pinLabelFontFamily, (int)pinLabelFontStyle, pinLabelBorderFontSize, finalPinLabelPoint, new StringFormat());
+
+                            // label border
+                            g.DrawPath(pinLabelBorderPen, path);
+                            // label fill
+                            g.FillPath(pinLabelBrush, path);
+                        }
                     }
                 }
             }
@@ -250,7 +314,7 @@ namespace OSMStaticMap
         private ClippedRectangleModel GetClipRectangle(IEnumerable<TileModel> tiles, IEnumerable<CoordinatesModel> coordinates, Image pinImage, int imageWidth, int imageHeight)
         {
             var positionsToKeepInMap = new List<PointF>();
-            var pinPositionsInMap = new List<PointF>();
+            var pinPositionsInMap = new List<PinPosition>();
 
             foreach (var coord in coordinates)
             {
@@ -274,10 +338,31 @@ namespace OSMStaticMap
                     positionsToKeepInMap.Add(pinPosInImage);
                     if (pinImage != null)
                     {
-                        pinPositionsInMap.Add(new PointF(
-                            pinPosInImage.X - (pinImage.Width / 2),
-                            pinPosInImage.Y - pinImage.Height
-                        ));
+                        var pin_x = pinPosInImage.X - (pinImage.Width / 2);
+                        var pin_y = pinPosInImage.Y - pinImage.Height;
+
+                        // top-left position of pinPosition-image
+                        var pinPosition = new PointF(
+                            pin_x,
+                            pin_y
+                        );
+
+                        // center of pinPosition-image
+                        var pinLabelPosition = new PointF(
+                            pin_x + (pinImage.Width / 2),
+                            pin_y + (pinImage.Height / 2)
+                        );
+
+                        pinPositionsInMap.Add(
+                            new PinPosition()
+                            {
+                                Point = pinPosition,
+                                LabelPoint = pinLabelPosition,
+                                Label = coord.PinLabel,
+                                LabelPosition = coord.PinPosition,
+                                PinPositionOffset = coord.PinPositionOffset
+                            }
+                        );
                     }
                 }
             }
@@ -289,7 +374,7 @@ namespace OSMStaticMap
             medianX = (positionsToKeepInMap.Max(i => i.X) + positionsToKeepInMap.Min(i => i.X)) / 2;
             medianY = ((positionsToKeepInMap.Max(i => i.Y) + positionsToKeepInMap.Min(i => i.Y)) / 2);
 
-            // offset the map center according to pin-image's width and height
+            // offset the map center according to pinPosition-image's width and height
             if (pinImage != null)
             {
                 medianY -= pinImage.Height / 2;
