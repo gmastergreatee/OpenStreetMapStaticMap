@@ -413,7 +413,7 @@
             Controls.Add(txtLat1);
             Controls.Add(txtLon1);
             Controls.Add(txtZoom);
-            FormBorderStyle = FormBorderStyle.FixedSingle;
+            MinimumSize = new Size(943, 528);
             Name = "MainWindow";
             SizeGripStyle = SizeGripStyle.Hide;
             Text = "MapImageDisplayer";

@@ -359,8 +359,8 @@ namespace OSMStaticMap
                                 Point = pinPosition,
                                 LabelPoint = pinLabelPosition,
                                 Label = coord.PinLabel,
-                                LabelPosition = coord.PinPosition,
-                                PinPositionOffset = coord.PinPositionOffset
+                                LabelPosition = coord.PinLabelPosition,
+                                PinPositionOffset = coord.PinLabelPositionOffset
                             }
                         );
                     }

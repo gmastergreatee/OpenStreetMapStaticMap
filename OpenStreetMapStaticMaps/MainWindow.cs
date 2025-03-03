@@ -37,28 +37,30 @@ namespace OpenStreetMapStaticMaps
                 for (var i = 0; i < coordinateList.Count; i++)
                 {
                     coordinateList[i].ShowPin = true;
-                    coordinateList[i].PinLabel = (i + 1).ToString();
+
+                    /// Comment below line to ignore pin-labels
+                    //coordinateList[i].PinLabel = (i + 1).ToString();
 
                     //// center
-                    //// this is by default, only need to set PinPositionOffset if required
-                    //coordinateList[i].PinPosition = PinLabelPositionEnum.Center;
-                    //coordinateList[i].PinPositionOffset = new PointF(0, -10);
+                    //// this is by default, only need to set PinLabelPositionOffset if required
+                    //coordinateList[i].PinLabelPosition = PinLabelPositionEnum.Center;
+                    //coordinateList[i].PinLabelPositionOffset = new PointF(0, -10);
 
                     // top
-                    coordinateList[i].PinPosition = PinLabelPositionEnum.Top;
-                    coordinateList[i].PinPositionOffset = new PointF(0, -25);
+                    coordinateList[i].PinLabelPosition = PinLabelPositionEnum.Top;
+                    coordinateList[i].PinLabelPositionOffset = new PointF(0, -25);
 
                     //// left
-                    //coordinateList[i].PinPosition = PinLabelPositionEnum.Left;
-                    //coordinateList[i].PinPositionOffset = new PointF(0, -8);
+                    //coordinateList[i].PinLabelPosition = PinLabelPositionEnum.Left;
+                    //coordinateList[i].PinLabelPositionOffset = new PointF(0, -8);
 
                     //// right
-                    //coordinateList[i].PinPosition = PinLabelPositionEnum.Right;
-                    //coordinateList[i].PinPositionOffset = new PointF(0, -8);
+                    //coordinateList[i].PinLabelPosition = PinLabelPositionEnum.Right;
+                    //coordinateList[i].PinLabelPositionOffset = new PointF(0, -8);
 
                     //// bottom
-                    //coordinateList[i].PinPosition = PinLabelPositionEnum.Bottom;
-                    //coordinateList[i].PinPositionOffset = new PointF(0, 0);
+                    //coordinateList[i].PinLabelPosition = PinLabelPositionEnum.Bottom;
+                    //coordinateList[i].PinLabelPositionOffset = new PointF(0, 0);
                 }
 
                 Task.Run(() =>
